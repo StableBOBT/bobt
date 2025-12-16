@@ -1,0 +1,20 @@
+[package]
+name = "treasury"
+version = "1.0.0"
+edition = "2021"
+description = "BOBT Treasury - Multi-sig reserve management with rate limiting"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+bobt_token = { path = "../bobt_token", features = ["testutils"] }
+
+[features]
+testutils = ["soroban-sdk/testutils"]
