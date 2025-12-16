@@ -1,0 +1,28 @@
+{
+  "_comment": "This is an example. Rename to testnet.json or mainnet.json after deployment",
+  "network": "testnet",
+  "identities": {
+    "owner": "bobt-owner-testnet",
+    "oracleOperator": "bobt-operator-testnet",
+    "treasurySigner1": "bobt-signer1-testnet",
+    "treasurySigner2": "bobt-signer2-testnet"
+  },
+  "publicKeys": {
+    "owner": "G...",
+    "oracleOperator": "G...",
+    "treasurySigner1": "G...",
+    "treasurySigner2": "G..."
+  },
+  "contracts": {
+    "oracle": "C...",
+    "bobtToken": "C...",
+    "treasury": "C..."
+  },
+  "initialized": {
+    "oracle": false,
+    "bobtToken": false,
+    "treasury": false,
+    "treasuryOracle": false,
+    "treasuryMinter": false
+  }
+}
