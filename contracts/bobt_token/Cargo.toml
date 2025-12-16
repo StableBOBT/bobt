@@ -1,0 +1,26 @@
+[package]
+name = "bobt_token"
+version = "1.0.0"
+edition = "2021"
+publish = false
+description = "BOBT Stablecoin - Professional grade stablecoin on Stellar Soroban"
+license = "MIT"
+
+[lib]
+crate-type = ["lib", "cdylib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+# OpenZeppelin Stellar Contracts (available for future integration)
+# stellar-tokens = { workspace = true }
+# stellar-access = { workspace = true }
+# stellar-contract-utils = { workspace = true }
+# stellar-macros = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+
+[features]
+testutils = ["soroban-sdk/testutils"]
