@@ -1,0 +1,27 @@
+{
+  "name": "bobt",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BOBT Stablecoin - Professional-grade stablecoin on Stellar Soroban",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "check-types": "turbo run check-types",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "contracts:build": "stellar contract build",
+    "contracts:test": "cargo test",
+    "oracle:update": "pnpm --filter @bobt/price-updater run update-prices"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3",
+    "typescript": "5.7.2"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

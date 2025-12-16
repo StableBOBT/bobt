@@ -1,5 +1,5 @@
 {
-  "name": "bobt-price-updater",
+  "name": "@bobt/price-updater",
   "version": "1.0.0",
   "description": "Updates BOBT Oracle with P2P prices from CriptoYa",
   "type": "module",

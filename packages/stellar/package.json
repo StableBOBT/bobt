@@ -1,0 +1,32 @@
+{
+  "name": "@bobt/stellar",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "BOBT Stellar/Soroban SDK utilities and contract bindings",
+  "exports": {
+    ".": "./src/index.ts",
+    "./contracts": "./src/contracts/index.ts",
+    "./hooks": "./src/hooks/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@stellar/freighter-api": "^3.0.0",
+    "@stellar/stellar-sdk": "^12.3.0"
+  },
+  "devDependencies": {
+    "@bobt/eslint-config": "workspace:*",
+    "@bobt/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "@types/react": "19",
+    "typescript": "^5.7.2"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}
