@@ -1,0 +1,19 @@
+[package]
+name = "oracle"
+version = "1.0.0"
+edition = "2021"
+description = "BOBT P2P Price Oracle - Multi-exchange price aggregation for BOB/USDT"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+
+[features]
+testutils = ["soroban-sdk/testutils"]
