@@ -1,0 +1,70 @@
+# BOBT Oracle Price Updater
+#
+# Automatically updates BOB/USDT prices from CriptoYa P2P data
+# Runs every 15 minutes via GitHub Actions (free tier)
+#
+# Required secrets:
+#   STELLAR_SECRET_KEY  - Operator's secret key
+#   ORACLE_CONTRACT_ID  - Oracle contract address
+
+name: Update Oracle Prices
+
+on:
+  schedule:
+    # Every 15 minutes
+    - cron: '*/15 * * * *'
+
+  # Manual trigger from GitHub UI
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network to use'
+        required: true
+        default: 'testnet'
+        type: choice
+        options:
+          - testnet
+          - mainnet
+
+# Prevent concurrent runs
+concurrency:
+  group: oracle-update
+  cancel-in-progress: false
+
+jobs:
+  update-prices:
+    name: Update Oracle Prices
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: scripts/price-updater/package-lock.json
+
+      - name: Install dependencies
+        working-directory: scripts/price-updater
+        run: npm ci
+
+      - name: Update Oracle prices
+        working-directory: scripts/price-updater
+        env:
+          STELLAR_SECRET_KEY: ${{ secrets.STELLAR_SECRET_KEY }}
+          ORACLE_CONTRACT_ID: ${{ secrets.ORACLE_CONTRACT_ID }}
+          NETWORK: ${{ inputs.network || 'testnet' }}
+        run: npm run update-prices
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Oracle Price Update" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Network:** ${{ inputs.network || 'testnet' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
