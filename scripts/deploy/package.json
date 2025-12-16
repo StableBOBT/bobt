@@ -1,0 +1,26 @@
+{
+  "name": "bobt-deploy",
+  "version": "1.0.0",
+  "description": "Deploy and initialize BOBT contracts on Stellar/Soroban",
+  "type": "module",
+  "scripts": {
+    "deploy": "tsx src/deploy.ts",
+    "deploy:testnet": "NETWORK=testnet tsx src/deploy.ts",
+    "deploy:mainnet": "NETWORK=mainnet tsx src/deploy.ts",
+    "status": "tsx src/status.ts",
+    "fund": "tsx src/fund.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^12.3.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
