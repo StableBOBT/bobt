@@ -1,0 +1,29 @@
+# Rust's output directory
+target/
+# But keep compiled WASM files for deployment
+!target/wasm32v1-none/
+!target/wasm32v1-none/release/
+!target/wasm32v1-none/release/*.wasm
+
+# Local settings
+.soroban
+.stellar
+deployments/
+!deployments/example.json
+
+# Node.js
+node_modules/
+dist/
+
+# Environment variables (NEVER commit secrets!)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
