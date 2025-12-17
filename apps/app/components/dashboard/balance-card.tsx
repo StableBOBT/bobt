@@ -27,11 +27,12 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { AddTokenHelper } from "./add-token-helper"
 
 type ModalType = "mint" | "burn" | null
 
 export function BalanceCard() {
-  const { isConnected, publicKey } = useWallet()
+  const { isConnected, publicKey, selectedWallet } = useWallet()
   const { isLoading, balanceFormatted, balanceNumber, refetch } = useBalance(publicKey)
   const {
     isProcessing,
@@ -169,6 +170,17 @@ export function BalanceCard() {
                 </span>
                 <span className="text-muted-foreground">BOBT</span>
               </div>
+
+              {/* Show add token helper when balance is 0 */}
+              {balanceNumber === 0 && (
+                <AddTokenHelper
+                  walletId={selectedWallet?.id}
+                  walletName={selectedWallet?.name}
+                  variant="inline"
+                  className="mt-2"
+                />
+              )}
+
               <div className="flex gap-2 mt-4">
                 <Button size="sm" className="flex-1" onClick={() => handleOpenModal("mint")}>
                   <ArrowDownRight className="h-4 w-4 mr-1" />

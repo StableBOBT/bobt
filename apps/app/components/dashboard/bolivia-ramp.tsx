@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner"
 import { PaymentQR } from "./payment-qr"
 import { OffRampStatus } from "./off-ramp-status"
+import { AddTokenHelper } from "./add-token-helper"
 
 // Price display component showing P2P rates
 function PriceDisplay() {
@@ -182,7 +183,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function BoliviaRamp() {
-  const { isConnected, publicKey, connect } = useWallet()
+  const { isConnected, publicKey, connect, selectedWallet } = useWallet()
   const rampApiUrl = process.env.NEXT_PUBLIC_RAMP_API_URL || 'http://localhost:3002'
   const {
     isLoading,
@@ -438,6 +439,18 @@ export function BoliviaRamp() {
         {!showPayment && (
           <>
             <PriceDisplay />
+
+            {/* Show add token helper when wallet is connected */}
+            {isConnected && (
+              <div className="mb-4">
+                <AddTokenHelper
+                  walletId={selectedWallet?.id}
+                  walletName={selectedWallet?.name}
+                  variant="alert"
+                />
+              </div>
+            )}
+
           <Tabs value={tab} onValueChange={(v) => { setTab(v); clearQuote(); }}>
             <TabsList className="grid w-full grid-cols-2 mb-4">
               <TabsTrigger value="buy">Comprar BOBT</TabsTrigger>
