@@ -136,7 +136,7 @@ export async function mintBOBT(
                 `${stellarConfig.horizonUrl}/transactions/${txHash}`
               );
               if (horizonResponse.ok) {
-                const horizonData = await horizonResponse.json();
+                const horizonData = await horizonResponse.json() as { successful?: boolean };
                 if (horizonData.successful) {
                   console.log(`[MINT] Verified success via Horizon: ${txHash}`);
                   return {

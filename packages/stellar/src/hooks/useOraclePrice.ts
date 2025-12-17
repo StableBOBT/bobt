@@ -7,7 +7,7 @@ import { fromStroops, BOBT_DECIMALS, toStroops } from '../config';
 import type { OraclePrice } from '../types';
 
 // Ramp service URL for fallback price fetching
-const RAMP_SERVICE_URL = process.env.NEXT_PUBLIC_RAMP_SERVICE_URL || 'http://localhost:3002';
+const RAMP_SERVICE_URL = process.env.NEXT_PUBLIC_RAMP_API_URL || 'http://localhost:3002';
 
 export interface UseOraclePriceReturn {
   price: OraclePrice | null;

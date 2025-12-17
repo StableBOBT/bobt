@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: bobt-ramp-service
+    runtime: node
+    buildCommand: pnpm install && pnpm build
+    startCommand: pnpm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3002"
+      - key: STELLAR_NETWORK
+        sync: false
+      - key: STELLAR_RPC_URL
+        sync: false
+      - key: STELLAR_HORIZON_URL
+        sync: false
+      - key: STELLAR_NETWORK_PASSPHRASE
+        sync: false
+      - key: ORACLE_CONTRACT_ID
+        sync: false
+      - key: TOKEN_CONTRACT_ID
+        sync: false
+      - key: TREASURY_CONTRACT_ID
+        sync: false
+      - key: STELLAR_SECRET_KEY
+        sync: false
+      - key: TREASURY_BANK_NAME
+        sync: false
+      - key: TREASURY_BANK_ACCOUNT
+        sync: false
+      - key: TREASURY_BANK_HOLDER
+        sync: false
