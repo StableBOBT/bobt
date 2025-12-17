@@ -98,43 +98,50 @@ export async function POST(request: NextRequest) {
     console.log(`[MINT] Transaction submitted: ${txHash}`);
 
     // Wait for confirmation
-    let status = sendResult.status;
-    let attempts = 0;
-    const maxAttempts = 30;
+    if (sendResult.status === 'PENDING') {
+      let attempts = 0;
+      const maxAttempts = 30;
 
-    while (status === 'PENDING' && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const txStatus = await server.getTransaction(txHash);
-      status = txStatus.status;
-      attempts++;
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const txStatus = await server.getTransaction(txHash);
+        attempts++;
 
-      if (status === 'SUCCESS') {
-        console.log(`[MINT] Transaction confirmed: ${txHash}`);
-        return NextResponse.json({
-          success: true,
-          data: {
-            txHash,
-            amount,
-            userAddress,
-            stellarExplorer: `https://stellar.expert/explorer/testnet/tx/${txHash}`,
-          },
-        });
-      }
+        if (txStatus.status === 'SUCCESS') {
+          console.log(`[MINT] Transaction confirmed: ${txHash}`);
+          return NextResponse.json({
+            success: true,
+            data: {
+              txHash,
+              amount,
+              userAddress,
+              stellarExplorer: `https://stellar.expert/explorer/testnet/tx/${txHash}`,
+            },
+          });
+        }
 
-      if (status === 'FAILED') {
-        return NextResponse.json(
-          { success: false, error: 'Transaction failed on-chain' },
-          { status: 500 }
-        );
+        if (txStatus.status === 'FAILED') {
+          return NextResponse.json(
+            { success: false, error: 'Transaction failed on-chain' },
+            { status: 500 }
+          );
+        }
+
+        // NOT_FOUND means still processing, continue waiting
+        if (txStatus.status !== 'NOT_FOUND') {
+          break;
+        }
       }
     }
 
-    // If we got here, transaction is still pending
+    // Return success with pending status if we couldn't confirm
     return NextResponse.json({
       success: true,
       data: {
         txHash,
-        status: 'pending',
+        amount,
+        userAddress,
+        status: 'submitted',
         message: 'Transaction submitted, check explorer for final status',
         stellarExplorer: `https://stellar.expert/explorer/testnet/tx/${txHash}`,
       },
