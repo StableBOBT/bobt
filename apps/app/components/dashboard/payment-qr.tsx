@@ -144,7 +144,7 @@ export function PaymentQR({
     }
 
     setIsSimulating(true)
-    const rampApiUrl = process.env.NEXT_PUBLIC_RAMP_API_URL || 'http://localhost:3002'
+    const rampApiUrl = process.env.NEXT_PUBLIC_RAMP_API_URL || ''
 
     try {
       // Step 1: Simulate bank deposit

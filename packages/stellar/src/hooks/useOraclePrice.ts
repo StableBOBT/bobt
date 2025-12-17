@@ -6,8 +6,8 @@ import { getBOBTClient } from '../client';
 import { fromStroops, BOBT_DECIMALS, toStroops } from '../config';
 import type { OraclePrice } from '../types';
 
-// Ramp service URL for fallback price fetching
-const RAMP_SERVICE_URL = process.env.NEXT_PUBLIC_RAMP_API_URL || 'http://localhost:3002';
+// External ramp service URL (optional, for fallback)
+const EXTERNAL_RAMP_URL = process.env.NEXT_PUBLIC_RAMP_API_URL;
 
 export interface UseOraclePriceReturn {
   price: OraclePrice | null;
@@ -23,40 +23,49 @@ export interface UseOraclePriceReturn {
   source: 'contract' | 'api' | null;
 }
 
-// Fetch prices from ramp-service API (CriptoYa)
+// Fetch prices from API (local Next.js API route first, then external if configured)
 async function fetchApiPrice(): Promise<{ ask: number; bid: number; mid: number } | null> {
-  try {
-    const response = await fetch(`${RAMP_SERVICE_URL}/api/prices/exchanges`);
-    if (!response.ok) return null;
-
-    const data = await response.json();
-    if (!data.success || !data.data.bestBuy) return null;
-
-    // Use best prices from exchanges
-    const prices = data.data.prices;
-    let totalAsk = 0, totalBid = 0, count = 0;
-
-    for (const exchange of Object.values(prices) as Array<{ ask: number; bid: number } | null>) {
-      if (exchange && exchange.ask > 0 && exchange.bid > 0) {
-        totalAsk += exchange.ask;
-        totalBid += exchange.bid;
-        count++;
-      }
-    }
-
-    if (count === 0) return null;
-
-    const avgAsk = totalAsk / count;
-    const avgBid = totalBid / count;
-
-    return {
-      ask: avgAsk,
-      bid: avgBid,
-      mid: (avgAsk + avgBid) / 2,
-    };
-  } catch {
-    return null;
+  // Try local API first (same origin), then external if available
+  const urls = ['/api/prices/exchanges'];
+  if (EXTERNAL_RAMP_URL) {
+    urls.push(`${EXTERNAL_RAMP_URL}/api/prices/exchanges`);
   }
+
+  for (const url of urls) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) continue;
+
+      const data = await response.json();
+      if (!data.success || !data.data.bestBuy) continue;
+
+      // Use best prices from exchanges
+      const prices = data.data.prices;
+      let totalAsk = 0, totalBid = 0, count = 0;
+
+      for (const exchange of Object.values(prices) as Array<{ ask: number; bid: number } | null>) {
+        if (exchange && exchange.ask > 0 && exchange.bid > 0) {
+          totalAsk += exchange.ask;
+          totalBid += exchange.bid;
+          count++;
+        }
+      }
+
+      if (count === 0) continue;
+
+      const avgAsk = totalAsk / count;
+      const avgBid = totalBid / count;
+
+      return {
+        ask: avgAsk,
+        bid: avgBid,
+        mid: (avgAsk + avgBid) / 2,
+      };
+    } catch {
+      continue;
+    }
+  }
+  return null;
 }
 
 export function useOraclePrice(refreshInterval = 30000): UseOraclePriceReturn {

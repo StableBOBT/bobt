@@ -38,10 +38,10 @@ export function useCryptoYaPrices(refreshInterval = 30000): UseCryptoYaPricesRet
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  // Get API URL from environment or default to localhost
+  // Get API URL from environment or use local API routes
   const apiUrl = typeof window !== 'undefined'
-    ? (process.env.NEXT_PUBLIC_RAMP_API_URL || 'http://localhost:3002')
-    : 'http://localhost:3002';
+    ? (process.env.NEXT_PUBLIC_RAMP_API_URL || '')
+    : '';
 
   const fetchPrices = useCallback(async () => {
     try {

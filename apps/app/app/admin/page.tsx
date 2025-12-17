@@ -100,7 +100,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function AdminPage() {
-  const rampApiUrl = process.env.NEXT_PUBLIC_RAMP_API_URL || "http://localhost:3002"
+  const rampApiUrl = process.env.NEXT_PUBLIC_RAMP_API_URL || ""
 
   const [stats, setStats] = useState<ServiceStats | null>(null)
   const [pendingRequests, setPendingRequests] = useState<RampRequest[]>([])

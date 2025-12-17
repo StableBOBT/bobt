@@ -184,7 +184,7 @@ function StatusBadge({ status }: { status: string }) {
 
 export function BoliviaRamp() {
   const { isConnected, publicKey, connect, selectedWallet } = useWallet()
-  const rampApiUrl = process.env.NEXT_PUBLIC_RAMP_API_URL || 'http://localhost:3002'
+  const rampApiUrl = process.env.NEXT_PUBLIC_RAMP_API_URL || ''
   const {
     isLoading,
     error,
