@@ -1459,7 +1459,7 @@ const binanceP2PLink = `https://p2p.binance.com/trade/BOB?
 
 ---
 
-**Documento preparado por:** Claude Opus 4.5
+**Documento preparado por:** BOBT Research Team
 **Fecha:** 16 de Diciembre, 2025
 **Versión:** 1.0
 **Proyecto:** BOBT Stablecoin
