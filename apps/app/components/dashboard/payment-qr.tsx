@@ -30,7 +30,13 @@ interface PaymentQRProps {
   onStatusChange?: (newStatus: string) => void
   onCancel?: () => void
   txHash?: string
+  requestId?: string // For testnet simulation
 }
+
+// Check if we're in testnet mode
+const isTestnet = process.env.NEXT_PUBLIC_STELLAR_NETWORK === 'testnet' ||
+                  process.env.NODE_ENV === 'development' ||
+                  typeof window !== 'undefined' && window.location.hostname === 'localhost'
 
 // Generate QR Simple compatible data
 function generateQRData(params: {
@@ -123,10 +129,71 @@ export function PaymentQR({
   onStatusChange,
   onCancel,
   txHash,
+  requestId,
 }: PaymentQRProps) {
   const [timeLeft, setTimeLeft] = useState<number>(0)
   const [paymentMethod, setPaymentMethod] = useState<"qr" | "transfer">("qr")
   const [isPolling] = useState(false)
+  const [isSimulating, setIsSimulating] = useState(false)
+
+  // Simulate payment for testnet
+  const handleSimulatePayment = async () => {
+    if (!requestId) {
+      toast.error("No se puede simular: falta el ID de solicitud")
+      return
+    }
+
+    setIsSimulating(true)
+    const rampApiUrl = process.env.NEXT_PUBLIC_RAMP_API_URL || 'http://localhost:3002'
+
+    try {
+      // Step 1: Simulate bank deposit
+      toast.info("Simulando deposito bancario...")
+      const depositRes = await fetch(`${rampApiUrl}/api/test/simulate-deposit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId }),
+      })
+
+      if (!depositRes.ok) {
+        const error = await depositRes.json()
+        throw new Error(error.error || 'Error simulando deposito')
+      }
+
+      // Step 2: Auto-verify and process
+      toast.info("Verificando y procesando...")
+      const verifyRes = await fetch(`${rampApiUrl}/api/test/auto-verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId }),
+      })
+
+      if (!verifyRes.ok) {
+        const error = await verifyRes.json()
+        throw new Error(error.error || 'Error verificando pago')
+      }
+
+      // Step 3: Process (mint BOBT)
+      toast.info("Minteando BOBT...")
+      const processRes = await fetch(`${rampApiUrl}/api/test/process`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId }),
+      })
+
+      if (!processRes.ok) {
+        const error = await processRes.json()
+        throw new Error(error.error || 'Error procesando mint')
+      }
+
+      toast.success("Pago simulado exitosamente! BOBT minteado.")
+      onStatusChange?.("completed")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error simulando pago')
+    } finally {
+      setIsSimulating(false)
+    }
+  }
 
   // Countdown timer
   useEffect(() => {
@@ -347,6 +414,39 @@ export function PaymentQR({
                 </ul>
               </div>
             </div>
+
+            {/* Testnet Simulation Button */}
+            {isTestnet && requestId && (
+              <div className="mt-4 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge variant="outline" className="bg-purple-500/20 text-purple-600 border-purple-500/30">
+                    TESTNET
+                  </Badge>
+                  <span className="text-sm font-medium text-purple-600">Modo de Prueba</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  En testnet puedes simular el pago sin hacer una transferencia real.
+                  Esto simulara el deposito bancario y minteara BOBT a tu wallet.
+                </p>
+                <Button
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  onClick={handleSimulatePayment}
+                  disabled={isSimulating}
+                >
+                  {isSimulating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Simulando pago...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Simular Pago (Testnet)
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </>
         )}
 
