@@ -22,10 +22,11 @@
 
 import express from 'express';
 import { z } from 'zod';
-import { serverConfig, validateConfig } from './config.js';
+import { serverConfig, validateConfig, stellarConfig } from './config.js';
 import { rampService } from './ramp-service.js';
 import { priceService } from './price-service.js';
 import { bnbSimulator, getBNBClient } from './bnb-client.js';
+import { mintBOBT, checkMinterRole } from './stellar-minter.js';
 import type { ApiResponse } from './types.js';
 
 // Validate configuration on startup
@@ -633,15 +634,26 @@ app.post('/api/test/process', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Failed to mark as processing' });
     }
 
-    // TODO: In production, this would:
-    // 1. Create a Treasury proposal to mint BOBT
-    // 2. Wait for multi-sig approval
-    // 3. Execute the mint transaction
-    // For now, we simulate with a fake tx hash
+    // Mint BOBT tokens on Stellar
+    console.log(`[PROCESS] Minting ${updatedRequest.bobtAmount} BOBT to ${updatedRequest.userAddress}`);
 
-    const fakeTxHash = `TEST_TX_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const mintResult = await mintBOBT(
+      updatedRequest.userAddress,
+      updatedRequest.bobtAmount,
+      requestId
+    );
 
-    updatedRequest = rampService.markCompleted(requestId, fakeTxHash);
+    if (!mintResult.success) {
+      // Revert to verified status on failure
+      console.error(`[PROCESS] Mint failed: ${mintResult.error}`);
+      return res.status(500).json({
+        success: false,
+        error: `Mint failed: ${mintResult.error}`,
+        hint: 'Check STELLAR_SECRET_KEY configuration and minter role',
+      });
+    }
+
+    updatedRequest = rampService.markCompleted(requestId, mintResult.txHash!);
     if (!updatedRequest) {
       return res.status(400).json({ success: false, error: 'Failed to mark as completed' });
     }
@@ -649,9 +661,9 @@ app.post('/api/test/process', async (req, res) => {
     res.json({
       success: true,
       data: {
-        message: 'Request processed successfully (TEST MODE)',
+        message: 'Request processed successfully - BOBT minted on Stellar!',
         request: updatedRequest,
-        note: 'In production, this would trigger real Stellar transactions',
+        stellarTx: `https://stellar.expert/explorer/testnet/tx/${mintResult.txHash}`,
       },
     });
   } catch (error) {
@@ -714,25 +726,40 @@ app.post('/api/test/full-flow', async (req, res) => {
     rampService.verifyRequest(request.id, 'full-flow-test');
     console.log(`[TEST] Request verified`);
 
-    // Step 5: Process (simulate mint)
+    // Step 5: Process (real mint on Stellar)
     rampService.markProcessing(request.id);
-    const fakeTxHash = `TEST_TX_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const completedRequest = rampService.markCompleted(request.id, fakeTxHash);
 
-    console.log(`[TEST] Request completed: ${fakeTxHash}`);
+    const mintResult = await mintBOBT(
+      userAddress,
+      request.bobtAmount,
+      request.id
+    );
+
+    if (!mintResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: `Mint failed: ${mintResult.error}`,
+        hint: 'Check STELLAR_SECRET_KEY configuration and minter role',
+      });
+    }
+
+    const completedRequest = rampService.markCompleted(request.id, mintResult.txHash!);
+
+    console.log(`[TEST] Request completed: ${mintResult.txHash}`);
 
     res.json({
       success: true,
       data: {
-        message: 'Full flow completed successfully (TEST MODE)',
+        message: 'Full flow completed - BOBT minted on Stellar testnet!',
         steps: [
           { step: 1, action: 'Created on-ramp request', requestId: request.id },
           { step: 2, action: 'Simulated bank deposit', reference: deposit.reference, amount: `Bs. ${deposit.amount}` },
           { step: 3, action: 'Verified deposit', verified: true },
           { step: 4, action: 'Updated request status', status: 'verified' },
-          { step: 5, action: 'Processed mint', txHash: fakeTxHash },
+          { step: 5, action: 'Minted BOBT on Stellar', txHash: mintResult.txHash },
         ],
         request: completedRequest,
+        stellarTx: `https://stellar.expert/explorer/testnet/tx/${mintResult.txHash}`,
         summary: {
           input: `Bs. ${bobAmount} BOB`,
           output: `${completedRequest?.bobtAmount} BOBT`,

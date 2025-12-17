@@ -21,6 +21,7 @@ import {
   TrendingUp,
   Shield,
   FileCheck,
+  Code2,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -50,6 +51,11 @@ const mainNav = [
     title: "Reserves",
     url: "/reserves",
     icon: FileCheck,
+  },
+  {
+    title: "Contracts",
+    url: "/contracts",
+    icon: Code2,
   },
 ]
 
