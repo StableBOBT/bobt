@@ -1,6 +1,6 @@
 {
-  "installCommand": "cd ../.. && pnpm install",
-  "buildCommand": "cd ../.. && pnpm build --filter=app",
-  "outputDirectory": ".next",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "installCommand": "npm i -g pnpm && cd ../.. && pnpm install --frozen-lockfile=false",
+  "buildCommand": "cd ../.. && pnpm turbo build --filter=@bobt/app",
+  "outputDirectory": ".next"
 }
