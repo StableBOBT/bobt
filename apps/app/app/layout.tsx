@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import localFont from "next/font/local"
 import "./globals.css"
 import { ThemeProvider } from "@/components/providers/theme-provider"
+import { WalletProviderWrapper } from "@/components/providers/wallet-provider"
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { WalletButton } from "@/components/wallet-button"
@@ -36,14 +37,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <WalletProviderWrapper>
           <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
-              <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
+              <header className="flex h-14 sm:h-16 shrink-0 items-center justify-between gap-2 border-b px-3 sm:px-4">
                 <div className="flex items-center gap-2">
                   <SidebarTrigger className="-ml-1" />
-                  <Separator orientation="vertical" className="mr-2 h-4" />
-                  <h1 className="text-lg font-semibold">Dashboard</h1>
+                  <Separator orientation="vertical" className="mr-2 h-4 hidden sm:block" />
+                  <h1 className="text-base sm:text-lg font-semibold hidden sm:block">Dashboard</h1>
                 </div>
                 <WalletButton />
               </header>
@@ -52,6 +54,7 @@ export default function RootLayout({
               </main>
             </SidebarInset>
           </SidebarProvider>
+          </WalletProviderWrapper>
           <Toaster />
         </ThemeProvider>
       </body>

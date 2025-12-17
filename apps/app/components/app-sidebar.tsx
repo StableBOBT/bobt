@@ -19,6 +19,8 @@ import {
   Settings,
   HelpCircle,
   TrendingUp,
+  Shield,
+  FileCheck,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -44,6 +46,11 @@ const mainNav = [
     url: "/history",
     icon: History,
   },
+  {
+    title: "Reserves",
+    url: "/reserves",
+    icon: FileCheck,
+  },
 ]
 
 const secondaryNav = [
@@ -56,6 +63,14 @@ const secondaryNav = [
     title: "Help",
     url: "/help",
     icon: HelpCircle,
+  },
+]
+
+const adminNav = [
+  {
+    title: "Admin Panel",
+    url: "/admin",
+    icon: Shield,
   },
 ]
 
@@ -96,6 +111,23 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {secondaryNav.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={pathname === item.url}>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Operador</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {adminNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link href={item.url}>

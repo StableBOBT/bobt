@@ -1,36 +1,36 @@
 import {
-  PriceCard,
   BalanceCard,
-  StatsCards,
-  PriceChart,
-  TradeWidget,
+  BoliviaRamp,
   RecentTransactions,
+  PriceCard,
+  TreasuryStatus,
 } from "@/components/dashboard"
 
 export default function DashboardPage() {
   return (
     <div className="p-6 space-y-6">
-      {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCards />
+      {/* Header */}
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold">Dashboard BOBT</h1>
+        <p className="text-muted-foreground">
+          Stablecoin Boliviano 1:1 con BOB - Deposita Bolivianos, recibe BOBT
+        </p>
       </div>
 
-      {/* Main Content */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Price and Chart Section */}
-        <div className="lg:col-span-2 space-y-6">
-          <PriceCard />
-          <PriceChart />
-        </div>
+      {/* Main Action: BOB → BOBT */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Left: Bolivia Ramp - Main Action */}
+        <BoliviaRamp />
 
-        {/* Right Sidebar */}
+        {/* Right: Balance, Price, Treasury */}
         <div className="space-y-6">
           <BalanceCard />
-          <TradeWidget />
+          <PriceCard />
+          <TreasuryStatus />
         </div>
       </div>
 
-      {/* Transactions Table */}
+      {/* Recent Activity */}
       <RecentTransactions />
     </div>
   )
