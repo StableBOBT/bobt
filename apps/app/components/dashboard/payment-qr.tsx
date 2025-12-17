@@ -31,6 +31,8 @@ interface PaymentQRProps {
   onCancel?: () => void
   txHash?: string
   requestId?: string // For testnet simulation
+  userAddress?: string // For direct minting
+  bobtAmount?: number // Amount to mint
 }
 
 // Check if we're in testnet mode
@@ -130,6 +132,8 @@ export function PaymentQR({
   onCancel,
   txHash,
   requestId,
+  userAddress,
+  bobtAmount,
 }: PaymentQRProps) {
   const [timeLeft, setTimeLeft] = useState<number>(0)
   const [paymentMethod, setPaymentMethod] = useState<"qr" | "transfer">("qr")
@@ -138,8 +142,9 @@ export function PaymentQR({
 
   // Simulate payment for testnet
   const handleSimulatePayment = async () => {
-    if (!requestId) {
-      toast.error("No se puede simular: falta el ID de solicitud")
+    // Check if we have what we need for direct minting
+    if (!userAddress || !bobtAmount) {
+      toast.error("No se puede simular: falta dirección o monto")
       return
     }
 
@@ -147,46 +152,38 @@ export function PaymentQR({
     const rampApiUrl = process.env.NEXT_PUBLIC_RAMP_API_URL || ''
 
     try {
-      // Step 1: Simulate bank deposit
-      toast.info("Simulando deposito bancario...")
-      const depositRes = await fetch(`${rampApiUrl}/api/test/simulate-deposit`, {
+      // Use direct minting API (works in Vercel without external service)
+      toast.info("Minteando BOBT en testnet...")
+      const mintRes = await fetch(`${rampApiUrl}/api/test/mint`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId }),
+        body: JSON.stringify({
+          userAddress,
+          amount: bobtAmount
+        }),
       })
 
-      if (!depositRes.ok) {
-        const error = await depositRes.json()
-        throw new Error(error.error || 'Error simulando deposito')
+      const result = await mintRes.json()
+
+      if (!mintRes.ok || !result.success) {
+        throw new Error(result.error || 'Error minteando BOBT')
       }
 
-      // Step 2: Auto-verify and process
-      toast.info("Verificando y procesando...")
-      const verifyRes = await fetch(`${rampApiUrl}/api/test/auto-verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId }),
-      })
-
-      if (!verifyRes.ok) {
-        const error = await verifyRes.json()
-        throw new Error(error.error || 'Error verificando pago')
-      }
-
-      // Step 3: Process (mint BOBT)
-      toast.info("Minteando BOBT...")
-      const processRes = await fetch(`${rampApiUrl}/api/test/process`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId }),
-      })
-
-      if (!processRes.ok) {
-        const error = await processRes.json()
-        throw new Error(error.error || 'Error procesando mint')
-      }
-
-      toast.success("Pago simulado exitosamente! BOBT minteado.")
+      toast.success(
+        <div>
+          BOBT minteado exitosamente!
+          {result.data?.stellarExplorer && (
+            <a
+              href={result.data.stellarExplorer}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-blue-400 underline mt-1"
+            >
+              Ver en Stellar Explorer
+            </a>
+          )}
+        </div>
+      )
       onStatusChange?.("completed")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error simulando pago')

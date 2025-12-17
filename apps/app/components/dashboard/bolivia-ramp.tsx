@@ -414,6 +414,8 @@ export function BoliviaRamp() {
             status={activeRequest.status}
             txHash={activeRequest.txHash}
             requestId={activeRequest.id}
+            userAddress={publicKey || undefined}
+            bobtAmount={activeRequest.bobtAmount}
             onStatusChange={handleRefreshStatus}
             onCancel={activeRequest.status === 'pending_payment' ? handleCancelRequest : handleBackToForm}
           />
